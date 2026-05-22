@@ -1,12 +1,12 @@
 ---
 context: catalog
 bounded-context: Catalog
-tier: B
+level: 2
 ---
 
-# Catalog Service — Use Case спецификация (Tier B)
+# Catalog Service — Use Case спецификация (Уровень 2)
 
-Контекст **Catalog** маркетплейс-кейса: продавец заводит карточку товара, публикует, скрывает; Order Service берёт цену по `productId`. Tier B (UCP Level 1–2): `usecase-pattern` (UseCase + Handler с CQRS-маркерами), без DDD-агрегатов, доменных событий, саг и hexagonal-разделения. Агрегатов нет; домен-юнит — сущность **Product** — в [`aggregates/product.md`](aggregates/product.md). Этот файл — секции уровня контекста.
+Контекст **Catalog** маркетплейс-кейса: продавец заводит карточку товара, публикует, скрывает; Order Service берёт цену по `productId`. Уровень 2: `usecase-pattern` (UseCase + Handler с CQRS-маркерами), без DDD-агрегатов, доменных событий, саг и hexagonal-разделения. Агрегатов нет; домен-юнит — сущность **Product** — в [`aggregates/product.md`](aggregates/product.md). Этот файл — секции уровня контекста.
 
 ## 1. Bounded Context
 
@@ -78,7 +78,7 @@ flowchart LR
 | **Status** | Состояние карточки: `DRAFT`, `PUBLISHED`, `HIDDEN`. Перевод — отдельная команда. |
 | **Опубликованный товар** | Product в `PUBLISHED` — единственное состояние, видимое Order Service и витрине. |
 
-**Намеренно нет:** Category (см. [границы](#1-bounded-context)); Aggregate / Value Object / Domain Event / Saga — это Tier C, в Catalog избыточно (модель плоская).
+**Намеренно нет:** Category (см. [границы](#1-bounded-context)); Aggregate / Value Object / Domain Event / Saga — это Уровень 3, в Catalog избыточно (модель плоская).
 
 ## 4. Роли и доступ
 
@@ -95,7 +95,7 @@ flowchart LR
 
 ## 5. Доменные события
 
-**Не применимо на Tier B.** Catalog не публикует доменных событий и не подписывается. Изменения статуса соседи наблюдают синхронно через REST.
+**Не применимо на Уровне 2.** Catalog не публикует доменных событий и не подписывается. Изменения статуса соседи наблюдают синхронно через REST.
 
 ## 6. Use Cases
 
@@ -117,7 +117,7 @@ flowchart LR
 
 ## 7. Процессы
 
-**Не применимо на Tier B.** Кросс-юнит процессов и распределённых транзакций нет. Каждая команда — одна локальная транзакция.
+**Не применимо на Уровне 2.** Кросс-юнит процессов и распределённых транзакций нет. Каждая команда — одна локальная транзакция.
 
 ## 8. UI-спецификация
 
@@ -212,4 +212,4 @@ erDiagram
     }
 ```
 
-Одна таблица `products`. Индекс по `seller_id` (для «мои товары»); чтение по `id` — по PK. Цена и валюта — два поля (`BigDecimal` + `String`); Value Object `Money` не вводится (Tier B). Read Model нет.
+Одна таблица `products`. Индекс по `seller_id` (для «мои товары»); чтение по `id` — по PK. Цена и валюта — два поля (`BigDecimal` + `String`); Value Object `Money` не вводится (Уровень 2). Read Model нет.
