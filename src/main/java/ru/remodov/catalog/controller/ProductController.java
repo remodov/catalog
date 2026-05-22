@@ -1,0 +1,90 @@
+package ru.remodov.catalog.controller;
+
+import java.net.URI;
+import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.RestController;
+import ru.remodov.catalog.api.AuthenticatedSeller;
+import ru.remodov.catalog.domain.ProductId;
+import ru.remodov.catalog.generated.api.ProductsApi;
+import ru.remodov.catalog.generated.api.model.CreateProductRequest;
+import ru.remodov.catalog.generated.api.model.ProductDto;
+import ru.remodov.catalog.generated.api.model.ProductPageDto;
+import ru.remodov.catalog.generated.api.model.ProductStatus;
+import ru.remodov.catalog.mapper.ProductJsonBeanMapper;
+import ru.remodov.catalog.repository.ProductRepository;
+import ru.remodov.catalog.usecase.product.CreateProductUseCase;
+import ru.remodov.catalog.usecase.product.GetProductQuery;
+import ru.remodov.catalog.usecase.product.HideProductUseCase;
+import ru.remodov.catalog.usecase.product.ListMyProductsQuery;
+import ru.remodov.catalog.usecase.product.PublishProductUseCase;
+import ru.vikulinva.usecase.UseCaseDispatcher;
+
+@RestController
+@RequiredArgsConstructor
+public class ProductController implements ProductsApi {
+
+    private final UseCaseDispatcher dispatcher;
+    private final AuthenticatedSeller authenticatedSeller;
+    private final ProductJsonBeanMapper mapper;
+
+    @Override
+    @PreAuthorize("hasRole('seller') or hasRole('admin')")
+    public ResponseEntity<ProductDto> createProduct(CreateProductRequest req) {
+        var sellerId = authenticatedSeller.currentSellerId();
+        var useCase = new CreateProductUseCase(
+            sellerId, req.getTitle(), req.getDescription(),
+            req.getPrice(), req.getCurrency().getValue()
+        );
+        ProductDto product = dispatcher.dispatch(useCase);
+        return ResponseEntity
+            .created(URI.create("/api/v1/products/" + product.getId()))
+            .body(product);
+    }
+
+    @Override
+    @PreAuthorize("permitAll()")
+    public ResponseEntity<ProductDto> getProduct(UUID id) {
+        return ResponseEntity.ok(dispatcher.dispatch(new GetProductQuery(ProductId.of(id))));
+    }
+
+    @Override
+    @PreAuthorize("hasRole('seller') or hasRole('admin')")
+    public ResponseEntity<ProductDto> publishProduct(UUID id) {
+        var sellerId = authenticatedSeller.currentSellerId();
+        boolean isAdmin = authenticatedSeller.isAdmin();
+        return ResponseEntity.ok(
+            dispatcher.dispatch(new PublishProductUseCase(ProductId.of(id), sellerId, isAdmin))
+        );
+    }
+
+    @Override
+    @PreAuthorize("hasRole('seller') or hasRole('admin')")
+    public ResponseEntity<ProductDto> hideProduct(UUID id) {
+        var sellerId = authenticatedSeller.currentSellerId();
+        boolean isAdmin = authenticatedSeller.isAdmin();
+        return ResponseEntity.ok(
+            dispatcher.dispatch(new HideProductUseCase(ProductId.of(id), sellerId, isAdmin))
+        );
+    }
+
+    @Override
+    @PreAuthorize("hasRole('seller') or hasRole('admin')")
+    public ResponseEntity<ProductPageDto> listMyProducts(
+        ProductStatus status,
+        Integer page,
+        Integer size,
+        String sort
+    ) {
+        var sellerId = authenticatedSeller.currentSellerId();
+        var dbStatus = status == null ? null : mapper.toDbStatus(status);
+        return ResponseEntity.ok(
+            dispatcher.dispatch(new ListMyProductsQuery(
+                sellerId, dbStatus, page, size, ProductRepository.SortField.parse(sort)
+            ))
+        );
+    }
+}
