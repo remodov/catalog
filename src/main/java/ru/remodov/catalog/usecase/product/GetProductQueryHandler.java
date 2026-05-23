@@ -3,8 +3,8 @@ package ru.remodov.catalog.usecase.product;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import ru.remodov.catalog.domain.Product;
 import ru.remodov.catalog.exception.ProductNotFoundException;
-import ru.remodov.catalog.generated.enums.ProductStatus;
 import ru.remodov.catalog.generated.api.model.ProductDto;
 import ru.remodov.catalog.mapper.ProductJsonBeanMapper;
 import ru.remodov.catalog.repository.ProductRepository;
@@ -23,12 +23,12 @@ public class GetProductQueryHandler implements UseCaseHandler<GetProductQuery, P
     @Override
     @Transactional(readOnly = true)
     public ProductDto handle(GetProductQuery q) {
-        var pojo = repo.findById(q.productId().value())
+        Product product = repo.findById(q.productId().value(), ProductRepository.SelectMode.NO_LOCK)
             .orElseThrow(() -> new ProductNotFoundException(q.productId().value()));
 
-        if (pojo.getStatus() != ProductStatus.PUBLISHED) {
+        if (product.status() != Product.Status.PUBLISHED) {
             throw new ProductNotFoundException(q.productId().value());
         }
-        return mapper.toDto(pojo);
+        return mapper.toDto(product);
     }
 }

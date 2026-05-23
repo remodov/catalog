@@ -1,12 +1,14 @@
 package ru.remodov.catalog.usecase.product;
 
+import java.time.ZoneOffset;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import ru.remodov.catalog.core.service.DateTimeService;
 import ru.remodov.catalog.core.service.UuidGenerator;
-import ru.remodov.catalog.generated.enums.ProductStatus;
-import ru.remodov.catalog.generated.tables.pojos.ProductsPojo;
+import ru.remodov.catalog.domain.Product;
+import ru.remodov.catalog.exception.InvalidCurrencyException;
+import ru.remodov.catalog.exception.InvalidPriceException;
 import ru.remodov.catalog.generated.api.model.ProductDto;
 import ru.remodov.catalog.mapper.ProductJsonBeanMapper;
 import ru.remodov.catalog.repository.ProductRepository;
@@ -15,6 +17,8 @@ import ru.vikulinva.usecase.UseCaseHandler;
 @Component
 @RequiredArgsConstructor
 public class CreateProductUseCaseHandler implements UseCaseHandler<CreateProductUseCase, ProductDto> {
+
+    private static final String SUPPORTED_CURRENCY = "RUB";
 
     private final ProductRepository repo;
     private final ProductJsonBeanMapper mapper;
@@ -27,18 +31,32 @@ public class CreateProductUseCaseHandler implements UseCaseHandler<CreateProduct
     @Override
     @Transactional
     public ProductDto handle(CreateProductUseCase uc) {
-        var now = dateTimeService.now().atOffset(java.time.ZoneOffset.UTC).toLocalDateTime();
-        var pojo = new ProductsPojo();
-        pojo.setId(uuidGenerator.generate());
-        pojo.setTitle(uc.title());
-        pojo.setDescription(uc.description());
-        pojo.setPrice(uc.price());
-        pojo.setCurrency(uc.currency());
-        pojo.setSellerId(uc.sellerId().value());
-        pojo.setStatus(ProductStatus.DRAFT);
-        pojo.setCreatedAt(now);
-        pojo.setUpdatedAt(now);
-        repo.insert(pojo);
-        return mapper.toDto(pojo);
+        validate(uc);
+        var now = dateTimeService.now().atOffset(ZoneOffset.UTC);
+        var product = new Product(
+            uuidGenerator.generate(),
+            uc.title(),
+            uc.description(),
+            uc.price(),
+            uc.currency(),
+            uc.sellerId().value(),
+            Product.Status.DRAFT,
+            now,
+            now
+        );
+        repo.insert(product);
+        return mapper.toDto(product);
+    }
+
+    private void validate(CreateProductUseCase uc) {
+        if (uc.title().isBlank()) {
+            throw new IllegalArgumentException("title must be non-empty");
+        }
+        if (uc.price().signum() <= 0) {
+            throw new InvalidPriceException("price must be > 0");
+        }
+        if (!SUPPORTED_CURRENCY.equals(uc.currency())) {
+            throw new InvalidCurrencyException(uc.currency());
+        }
     }
 }

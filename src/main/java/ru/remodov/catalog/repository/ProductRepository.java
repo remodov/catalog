@@ -1,43 +1,27 @@
 package ru.remodov.catalog.repository;
 
-import java.util.List;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
-import ru.remodov.catalog.generated.enums.ProductStatus;
-import ru.remodov.catalog.generated.tables.pojos.ProductsPojo;
+import ru.remodov.catalog.domain.PageView;
+import ru.remodov.catalog.domain.Product;
+import ru.remodov.catalog.domain.ProductSortField;
 
 public interface ProductRepository {
 
-    void insert(ProductsPojo product);
+    void insert(Product product);
 
-    Optional<ProductsPojo> findById(UUID id);
+    Optional<Product> findById(UUID id, SelectMode mode);
 
-    void updateStatus(UUID id, ProductStatus newStatus, java.time.Instant updatedAt);
+    void updateStatus(UUID id, Product.Status newStatus, OffsetDateTime updatedAt);
 
-    long countBySeller(UUID sellerId, ProductStatus statusFilterOrNull);
-
-    List<ProductsPojo> findBySeller(
+    PageView<Product> findBySeller(
         UUID sellerId,
-        ProductStatus statusFilterOrNull,
+        Product.Status statusFilterOrNull,
         int offset,
         int limit,
-        SortField sort
+        ProductSortField sort
     );
 
-    enum SortField {
-        CREATED_AT_DESC, CREATED_AT_ASC, UPDATED_AT_DESC, UPDATED_AT_ASC, TITLE_ASC, TITLE_DESC;
-
-        public static SortField parse(String raw) {
-            if (raw == null || raw.isBlank()) return CREATED_AT_DESC;
-            return switch (raw.toLowerCase()) {
-                case "createdat,asc"  -> CREATED_AT_ASC;
-                case "createdat,desc" -> CREATED_AT_DESC;
-                case "updatedat,asc"  -> UPDATED_AT_ASC;
-                case "updatedat,desc" -> UPDATED_AT_DESC;
-                case "title,asc"      -> TITLE_ASC;
-                case "title,desc"     -> TITLE_DESC;
-                default -> CREATED_AT_DESC;
-            };
-        }
-    }
+    enum SelectMode { NO_LOCK, FOR_UPDATE }
 }
