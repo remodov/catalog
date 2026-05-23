@@ -66,6 +66,12 @@ public class ProblemDetailExceptionHandler {
         return problem(HttpStatus.BAD_REQUEST, "MALFORMED_REQUEST", "Невозможно разобрать тело запроса");
     }
 
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ProblemDetail> handleUnexpected(Exception e) {
+        return problem(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR",
+            "Внутренняя ошибка сервера");
+    }
+
     private ResponseEntity<ProblemDetail> problem(HttpStatus status, String code, String detail) {
         return ResponseEntity.status(status).body(problemDetail(status, code, detail));
     }
