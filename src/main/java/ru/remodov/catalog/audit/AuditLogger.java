@@ -35,7 +35,7 @@ public class AuditLogger {
         entry.setActorId(actor.value());
         entry.setAction(action);
         entry.setProductId(productId);
-        entry.setOccurredAt(dateTimeService.now().atOffset(ZoneOffset.UTC).toLocalDateTime());
+        entry.setOccurredAt(dateTimeService.now().atOffset(ZoneOffset.UTC));
         entry.setMetadata(JSONB.valueOf(serialize(metadata)));
         repo.insert(entry);
     }

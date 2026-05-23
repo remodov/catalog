@@ -1,5 +1,7 @@
 import org.jooq.meta.jaxb.Logging
 import org.jooq.meta.jaxb.ForcedType
+import org.jooq.meta.jaxb.Matchers
+import org.jooq.meta.jaxb.MatchersTableType
 
 plugins {
     java
@@ -18,6 +20,7 @@ java {
 }
 
 repositories {
+    mavenLocal()
     mavenCentral()
     maven { url = uri("https://maven.pkg.github.com/remodov/usecase-pattern") }
 }
@@ -43,7 +46,8 @@ dependencies {
 
     // usecase-pattern library (BS — UCP Tier B core)
     // Версия выставится при первом mvn-resolve; placeholder для bootstrap-скилла.
-    implementation("ru.vikulinva:usecase-pattern:1.0.0")
+    implementation("ru.vikulinva:usecase-pattern:1.1.0")
+    implementation("ru.vikulinva:usecase-pattern-starter:1.1.0")
 
     implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("io.opentelemetry:opentelemetry-api:1.45.0")
@@ -71,12 +75,13 @@ dependencies {
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.testcontainers:junit-jupiter:1.20.4")
     testImplementation("org.testcontainers:postgresql:1.20.4")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("com.github.tomakehurst:wiremock-jre8-standalone:3.0.1")
 }
 
 // BS-17/18/19: jOOQ codegen из applied-схемы локального Postgres
 jooq {
-    version.set("3.19.15")
+    version.set("3.19.18")
     configurations {
         create("main") {
             generateSchemaSourceOnCompilation.set(false)
@@ -90,6 +95,15 @@ jooq {
                 }
                 generator.apply {
                     name = "org.jooq.codegen.JavaGenerator"
+                    strategy.apply {
+                        matchers = Matchers().withTables(listOf(
+                            MatchersTableType().apply {
+                                pojoClass = org.jooq.meta.jaxb.MatcherRule()
+                                    .withExpression("$0_Pojo")
+                                    .withTransform(org.jooq.meta.jaxb.MatcherTransformType.PASCAL)
+                            }
+                        ))
+                    }
                     database.apply {
                         name = "org.jooq.meta.postgres.PostgresDatabase"
                         inputSchema = "public"

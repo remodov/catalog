@@ -1,7 +1,8 @@
-# BS-2/BS-4: только overrides для @SpringBootTest.
-# Postgres подаётся через Testcontainers (см. AbstractIntegrationTest); URL/user/password
-# инъектируются через @DynamicPropertySource — здесь только то, что от профиля не зависит.
 spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/catalog
+    username: catalog
+    password: catalog
   jpa:
     open-in-view: false
   liquibase:

@@ -5,7 +5,7 @@ import ru.remodov.catalog.domain.Product;
 import ru.remodov.catalog.domain.ProductSortField;
 import ru.remodov.catalog.domain.SellerId;
 import ru.remodov.catalog.generated.api.model.ProductPageDto;
-import ru.vikulinva.usecase.UseCaseQuery;
+import ru.vikulinva.usecase.cqrs.UseCaseQuery;
 
 public record ListMyProductsQuery(
     SellerId requesterSellerId,

@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.util.Objects;
 import ru.remodov.catalog.domain.SellerId;
 import ru.remodov.catalog.generated.api.model.ProductDto;
-import ru.vikulinva.usecase.UseCaseCommand;
+import ru.vikulinva.usecase.cqrs.UseCaseCommand;
 
 public record CreateProductUseCase(
     SellerId sellerId,

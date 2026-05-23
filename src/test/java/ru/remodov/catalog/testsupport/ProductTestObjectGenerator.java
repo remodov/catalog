@@ -1,7 +1,6 @@
 package ru.remodov.catalog.testsupport;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.UUID;
@@ -17,8 +16,8 @@ public class ProductTestObjectGenerator {
     private String currency = "RUB";
     private UUID sellerId = UUID.randomUUID();
     private ProductStatus status = ProductStatus.DRAFT;
-    private LocalDateTime createdAt = OffsetDateTime.now(ZoneOffset.UTC).withNano(0).toLocalDateTime();
-    private LocalDateTime updatedAt = createdAt;
+    private OffsetDateTime createdAt = OffsetDateTime.now(ZoneOffset.UTC).withNano(0);
+    private OffsetDateTime updatedAt = createdAt;
 
     public ProductTestObjectGenerator withId(UUID id) { this.id = id; return this; }
     public ProductTestObjectGenerator withTitle(String t) { this.title = t; return this; }
@@ -26,8 +25,8 @@ public class ProductTestObjectGenerator {
     public ProductTestObjectGenerator withCurrency(String c) { this.currency = c; return this; }
     public ProductTestObjectGenerator withSellerId(UUID s) { this.sellerId = s; return this; }
     public ProductTestObjectGenerator withStatus(ProductStatus s) { this.status = s; return this; }
-    public ProductTestObjectGenerator withCreatedAt(LocalDateTime t) { this.createdAt = t; return this; }
-    public ProductTestObjectGenerator withUpdatedAt(LocalDateTime t) { this.updatedAt = t; return this; }
+    public ProductTestObjectGenerator withCreatedAt(OffsetDateTime t) { this.createdAt = t; return this; }
+    public ProductTestObjectGenerator withUpdatedAt(OffsetDateTime t) { this.updatedAt = t; return this; }
 
     public ProductsPojo generate() {
         var p = new ProductsPojo();

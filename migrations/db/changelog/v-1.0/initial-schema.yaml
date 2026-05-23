@@ -56,10 +56,9 @@ databaseChangeLog:
                   type: timestamptz
                   constraints: { nullable: false }
                   defaultValueComputed: now()
-        - addCheckConstraint:
-            tableName: products
-            constraintName: products_price_positive
-            checkCondition: price > 0
+        - sql:
+            sql: "ALTER TABLE products ADD CONSTRAINT products_price_positive CHECK (price > 0)"
+            rollback: "ALTER TABLE products DROP CONSTRAINT products_price_positive"
         - createIndex:
             tableName: products
             indexName: idx_products_seller_id
