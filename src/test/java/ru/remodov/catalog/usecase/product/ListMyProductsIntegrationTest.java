@@ -50,6 +50,65 @@ class ListMyProductsIntegrationTest extends CatalogBaseIntegrationTest {
     }
 
     @Test
+    @DisplayName("AC-C8: 3 продукта, size=2, page=1 → 2 элемента, totalPages=2")
+    void listMy_size2Page1_returnsFirstPage() {
+        databasePreparer
+            .createProduct(new ProductTestObjectGenerator().withSellerId(sellerId).withStatus(ProductStatus.PUBLISHED).generate())
+            .createProduct(new ProductTestObjectGenerator().withSellerId(sellerId).withStatus(ProductStatus.PUBLISHED).generate())
+            .createProduct(new ProductTestObjectGenerator().withSellerId(sellerId).withStatus(ProductStatus.PUBLISHED).generate())
+            .prepare();
+
+        var response = restTemplate.exchange(
+            URL + "?page=1&size=2", HttpMethod.GET,
+            new HttpEntity<>(TestHttpHeaders.withSellerToken(sellerId)),
+            ProductPageDto.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        var page = response.getBody();
+        assertThat(page.getContent()).hasSize(2);
+        assertThat(page.getTotalElements()).isEqualTo(3);
+        assertThat(page.getTotalPages()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("AC-C8: 3 продукта, size=2, page=2 → 1 элемент")
+    void listMy_size2Page2_returnsRemainder() {
+        databasePreparer
+            .createProduct(new ProductTestObjectGenerator().withSellerId(sellerId).withStatus(ProductStatus.PUBLISHED).generate())
+            .createProduct(new ProductTestObjectGenerator().withSellerId(sellerId).withStatus(ProductStatus.PUBLISHED).generate())
+            .createProduct(new ProductTestObjectGenerator().withSellerId(sellerId).withStatus(ProductStatus.PUBLISHED).generate())
+            .prepare();
+
+        var response = restTemplate.exchange(
+            URL + "?page=2&size=2", HttpMethod.GET,
+            new HttpEntity<>(TestHttpHeaders.withSellerToken(sellerId)),
+            ProductPageDto.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        var page = response.getBody();
+        assertThat(page.getContent()).hasSize(1);
+        assertThat(page.getTotalElements()).isEqualTo(3);
+        assertThat(page.getTotalPages()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("AC-C8: 0 продуктов → пустой content")
+    void listMy_noProducts_returnsEmpty() {
+        var response = restTemplate.exchange(
+            URL + "?page=1&size=20", HttpMethod.GET,
+            new HttpEntity<>(TestHttpHeaders.withSellerToken(sellerId)),
+            ProductPageDto.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        var page = response.getBody();
+        assertThat(page.getContent()).isEmpty();
+        assertThat(page.getTotalElements()).isZero();
+    }
+
+    @Test
     @DisplayName("AC-C9: фильтр status=DRAFT возвращает только DRAFT")
     void listMy_withStatusFilter_returnsOnlyMatching() {
         databasePreparer
