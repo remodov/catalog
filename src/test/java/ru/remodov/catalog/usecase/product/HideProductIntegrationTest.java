@@ -53,6 +53,25 @@ class HideProductIntegrationTest extends CatalogBaseIntegrationTest {
     }
 
     @Test
+    @DisplayName("AC-C4 / BR-P04: чужой seller пытается скрыть → 404 OWN_PRODUCT_REQUIRED")
+    void hide_whenOtherSeller_returns404OwnProductRequired() {
+        var productId = UUID.randomUUID();
+        var product = new ProductTestObjectGenerator()
+            .withId(productId).withSellerId(sellerId).withStatus(ProductStatus.PUBLISHED).generate();
+        databasePreparer.createProduct(product).prepare();
+
+        var otherSellerId = UUID.randomUUID();
+        var response = restTemplate.exchange(
+            URL + "/" + productId + "/hide", HttpMethod.POST,
+            new HttpEntity<>(TestHttpHeaders.withSellerToken(otherSellerId)),
+            ProblemDetail.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody().getProperties()).containsEntry("code", "OWN_PRODUCT_REQUIRED");
+    }
+
+    @Test
     @DisplayName("BR-C5: hide DRAFT → 409 INVALID_STATE_TRANSITION")
     void hide_whenDraft_returns409() {
         var productId = UUID.randomUUID();
