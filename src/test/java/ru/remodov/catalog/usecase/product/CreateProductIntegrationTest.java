@@ -6,6 +6,7 @@ import static ru.remodov.catalog.generated.Tables.PRODUCTS;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -128,6 +129,69 @@ class CreateProductIntegrationTest extends CatalogBaseIntegrationTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(response.getBody().getId()).isEqualTo(serverGeneratedId);
         assertThat(response.getBody().getId()).isNotEqualTo(clientSentId);
+    }
+
+    @Test
+    @DisplayName("BR-P01: отрицательная цена → 400 INVALID_PRICE")
+    void create_whenPriceNegative_returns400InvalidPrice() {
+        given(uuidGenerator.generate()).willReturn(UUID.randomUUID());
+        given(dateTimeService.now()).willReturn(Instant.now());
+
+        var body = Map.of(
+            "title", "T", "description", "",
+            "price", new BigDecimal("-10.00"), "currency", "RUB"
+        );
+
+        var response = restTemplate.exchange(
+            URL, HttpMethod.POST,
+            new HttpEntity<>(body, TestHttpHeaders.withSellerToken(sellerId)),
+            ProblemDetail.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody().getProperties()).containsEntry("code", "INVALID_PRICE");
+    }
+
+    @Test
+    @DisplayName("BR-P01: price=null → 400")
+    void create_whenPriceNull_returns400() {
+        given(uuidGenerator.generate()).willReturn(UUID.randomUUID());
+        given(dateTimeService.now()).willReturn(Instant.now());
+
+        var body = new HashMap<String, Object>();
+        body.put("title", "T");
+        body.put("description", "");
+        body.put("price", null);
+        body.put("currency", "RUB");
+
+        var response = restTemplate.exchange(
+            URL, HttpMethod.POST,
+            new HttpEntity<>(body, TestHttpHeaders.withSellerToken(sellerId)),
+            ProblemDetail.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    @DisplayName("BR-P02: currency=null → 400")
+    void create_whenCurrencyNull_returns400() {
+        given(uuidGenerator.generate()).willReturn(UUID.randomUUID());
+        given(dateTimeService.now()).willReturn(Instant.now());
+
+        var body = new HashMap<String, Object>();
+        body.put("title", "T");
+        body.put("description", "");
+        body.put("price", new BigDecimal("100"));
+        body.put("currency", null);
+
+        var response = restTemplate.exchange(
+            URL, HttpMethod.POST,
+            new HttpEntity<>(body, TestHttpHeaders.withSellerToken(sellerId)),
+            ProblemDetail.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
     @Test
