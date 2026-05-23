@@ -65,6 +65,27 @@ class AdminAuditIntegrationTest extends CatalogBaseIntegrationTest {
     }
 
     @Test
+    @DisplayName("BR-P04 admin path: admin скрывает чужой PUBLISHED → 200 HIDDEN")
+    void hideByAdmin_bypassesOwnerCheck() {
+        var auditId = UUID.randomUUID();
+        given(uuidGenerator.generate()).willReturn(auditId);
+
+        var productId = UUID.randomUUID();
+        var product = new ProductTestObjectGenerator()
+            .withId(productId).withSellerId(ownerSellerId).withStatus(ProductStatus.PUBLISHED).generate();
+        databasePreparer.createProduct(product).prepare();
+
+        var response = restTemplate.exchange(
+            URL + "/" + productId + "/hide", HttpMethod.POST,
+            new HttpEntity<>(TestHttpHeaders.withAdminToken(adminId)),
+            ProductDto.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().getStatus().name()).isEqualTo("HIDDEN");
+    }
+
+    @Test
     @DisplayName("AUTH-15: seller публикует свой продукт → audit-таблица пустая")
     void publishByOwner_doesNotWriteAudit() {
         given(uuidGenerator.generate()).willReturn(UUID.randomUUID());
