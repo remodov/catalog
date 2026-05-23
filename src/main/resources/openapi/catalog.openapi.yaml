@@ -29,7 +29,7 @@ paths:
       summary: Создать карточку товара (DRAFT)
       description: |
         Создаёт продукт в статусе `DRAFT` от имени текущего seller'а (sellerId берётся из JWT.sub).
-        BR-C1 (price > 0), BR-C2 (currency=RUB), BR-C3 (server-generated UUID).
+        BR-P01 (price > 0), BR-P02 (currency=RUB), BR-P03 (server-generated UUID).
       security:
         - bearerAuth: [seller]
       requestBody:
@@ -65,7 +65,7 @@ paths:
       operationId: getProduct
       summary: Получить продукт по ID
       description: |
-        Публичный read. Возвращает 200 только для `PUBLISHED` (BR-C6).
+        Публичный read. Возвращает 200 только для `PUBLISHED` (BR-P06).
         Для `DRAFT|HIDDEN` — 404 `PRODUCT_NOT_FOUND` (используется Order Service'ом для расчёта заказа).
       security: []
       responses:
@@ -86,8 +86,8 @@ paths:
       operationId: publishProduct
       summary: Опубликовать продукт
       description: |
-        Action-эндпоинт. Переводит `DRAFT|HIDDEN → PUBLISHED` (BR-C5).
-        ABAC: только владелец (BR-C4); чужой → 404 `OWN_PRODUCT_REQUIRED`.
+        Action-эндпоинт. Переводит `DRAFT|HIDDEN → PUBLISHED` (BR-P05).
+        ABAC: только владелец (BR-P04); чужой → 404 `OWN_PRODUCT_REQUIRED`.
       security:
         - bearerAuth: [seller]
       responses:
@@ -111,8 +111,8 @@ paths:
       operationId: hideProduct
       summary: Скрыть продукт
       description: |
-        Action-эндпоинт. Переводит `PUBLISHED → HIDDEN` (BR-C5).
-        ABAC: только владелец (BR-C4); чужой → 404 `OWN_PRODUCT_REQUIRED`.
+        Action-эндпоинт. Переводит `PUBLISHED → HIDDEN` (BR-P05).
+        ABAC: только владелец (BR-P04); чужой → 404 `OWN_PRODUCT_REQUIRED`.
       security:
         - bearerAuth: [seller]
       responses:
@@ -362,7 +362,7 @@ components:
                 detail: 'Невозможно разобрать тело запроса'
                 code: MALFORMED_REQUEST
             invalidPrice:
-              summary: Цена ≤ 0 (BR-C1)
+              summary: Цена ≤ 0 (BR-P01)
               value:
                 type: 'about:blank'
                 status: 400
@@ -370,7 +370,7 @@ components:
                 detail: 'Цена должна быть больше нуля'
                 code: INVALID_PRICE
             invalidCurrency:
-              summary: Валюта не RUB (BR-C2)
+              summary: Валюта не RUB (BR-P02)
               value:
                 type: 'about:blank'
                 status: 400
@@ -426,7 +426,7 @@ components:
             $ref: '#/components/schemas/ProblemDetails'
           examples:
             notFound:
-              summary: Продукт не найден или не PUBLISHED (BR-C6)
+              summary: Продукт не найден или не PUBLISHED (BR-P06)
               value:
                 type: 'about:blank'
                 status: 404
@@ -434,7 +434,7 @@ components:
                 detail: 'Продукт не найден'
                 code: PRODUCT_NOT_FOUND
             ownProductRequired:
-              summary: Чужой продукт (BR-C4) — намеренно 404, не 403
+              summary: Чужой продукт (BR-P04) — намеренно 404, не 403
               value:
                 type: 'about:blank'
                 status: 404
@@ -450,7 +450,7 @@ components:
             $ref: '#/components/schemas/ProblemDetails'
           examples:
             invalidStateTransition:
-              summary: Недопустимый переход статуса (BR-C5)
+              summary: Недопустимый переход статуса (BR-P05)
               value:
                 type: 'about:blank'
                 status: 409
