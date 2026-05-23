@@ -9,6 +9,8 @@ spring:
       maximum-pool-size: 10
   jooq:
     sql-dialect: POSTGRES
+  jackson:
+    default-property-inclusion: non_null
   liquibase:
     change-log: classpath:db/changelog-master.yaml
     contexts: production
