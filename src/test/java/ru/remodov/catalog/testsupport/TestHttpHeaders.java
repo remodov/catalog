@@ -20,6 +20,13 @@ public final class TestHttpHeaders {
         return token("customer", customerId);
     }
 
+    public static HttpHeaders withServiceAccountToken() {
+        var h = new HttpHeaders();
+        h.setBearerAuth(FakeJwtDecoder.SERVICE_ACCOUNT_TOKEN);
+        h.setContentType(MediaType.APPLICATION_JSON);
+        return h;
+    }
+
     public static HttpHeaders anonymous() {
         var h = new HttpHeaders();
         h.setContentType(MediaType.APPLICATION_JSON);
