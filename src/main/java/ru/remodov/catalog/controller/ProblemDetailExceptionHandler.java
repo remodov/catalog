@@ -72,7 +72,7 @@ public class ProblemDetailExceptionHandler {
 
     private ProblemDetail problemDetail(HttpStatus status, String code, String detail) {
         var pd = ProblemDetail.forStatusAndDetail(status, detail);
-        pd.setType(URI.create("about:blank"));
+        pd.setType(URI.create("urn:problem:catalog:" + code));
         pd.setTitle(status.getReasonPhrase());
         pd.setProperty("code", code);
         return pd;
