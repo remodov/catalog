@@ -79,4 +79,42 @@ class GetProductIntegrationTest extends CatalogBaseIntegrationTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(response.getBody().getProperties()).containsEntry("code", "PRODUCT_NOT_FOUND");
     }
+
+    @Test
+    @DisplayName("AC-C9: service-account читает PUBLISHED → 200 с ценой")
+    void get_whenServiceAccountReadsPublished_returns200WithPrice() {
+        var productId = UUID.randomUUID();
+        var product = new ProductTestObjectGenerator()
+            .withId(productId).withStatus(ProductStatus.PUBLISHED).generate();
+        databasePreparer.createProduct(product).prepare();
+
+        var response = restTemplate.exchange(
+            URL + "/" + productId, HttpMethod.GET,
+            new HttpEntity<>(TestHttpHeaders.withServiceAccountToken()),
+            ProductDto.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().getId()).isEqualTo(productId);
+        assertThat(response.getBody().getPrice()).isEqualByComparingTo(product.getPrice());
+    }
+
+    @Test
+    @DisplayName("AC-C9: service-account читает DRAFT → 404 PRODUCT_NOT_FOUND")
+    void get_whenServiceAccountReadsDraft_returns404() {
+        var productId = UUID.randomUUID();
+        var product = new ProductTestObjectGenerator()
+            .withId(productId).withStatus(ProductStatus.DRAFT).generate();
+        databasePreparer.createProduct(product).prepare();
+
+        var response = restTemplate.exchange(
+            URL + "/" + productId, HttpMethod.GET,
+            new HttpEntity<>(TestHttpHeaders.withServiceAccountToken()),
+            ProblemDetail.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody().getProperties()).containsEntry("code", "PRODUCT_NOT_FOUND");
+    }
+
 }
