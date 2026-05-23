@@ -6,6 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -66,8 +68,24 @@ public class ProblemDetailExceptionHandler {
         return problem(HttpStatus.BAD_REQUEST, "MALFORMED_REQUEST", "Невозможно разобрать тело запроса");
     }
 
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ProblemDetail> handleAccessDenied(AccessDeniedException e) {
+        return problem(HttpStatus.FORBIDDEN, "ACCESS_DENIED", "Доступ запрещён");
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ProblemDetail> handleAuthentication(AuthenticationException e) {
+        return problem(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "Требуется аутентификация");
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ProblemDetail> handleUnexpected(Exception e) {
+        if (e instanceof AccessDeniedException ade) {
+            return handleAccessDenied(ade);
+        }
+        if (e instanceof AuthenticationException ae) {
+            return handleAuthentication(ae);
+        }
         return problem(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR",
             "Внутренняя ошибка сервера");
     }

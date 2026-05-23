@@ -35,7 +35,7 @@ public final class TestHttpHeaders {
 
     private static HttpHeaders token(String role, UUID id) {
         var h = new HttpHeaders();
-        h.setBearerAuth(role + ":" + id);
+        h.setBearerAuth(role + "." + id);
         h.setContentType(MediaType.APPLICATION_JSON);
         return h;
     }

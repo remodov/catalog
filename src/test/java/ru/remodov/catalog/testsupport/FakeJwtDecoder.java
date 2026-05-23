@@ -27,9 +27,9 @@ public class FakeJwtDecoder implements JwtDecoder {
             );
             return new Jwt(token, now, now.plusSeconds(3600), headers, claims);
         }
-        String[] parts = token.split(":", 2);
+        String[] parts = token.split("\\.", 2);
         if (parts.length != 2) {
-            throw new JwtException("Test token must be in format <role>:<uuid>: " + token);
+            throw new JwtException("Test token must be in format <role>.<uuid>: " + token);
         }
         String role = parts[0];
         UUID subject;
