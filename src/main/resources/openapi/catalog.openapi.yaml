@@ -15,7 +15,7 @@ servers:
     description: Local
 
 tags:
-  - name: products
+  - name: Products
     description: Управление карточками товаров, публичный read и личный кабинет продавца
 
 security:
@@ -24,7 +24,7 @@ security:
 paths:
   /api/v1/products:
     post:
-      tags: [products]
+      tags: [Products]
       operationId: createProduct
       summary: Создать карточку товара (DRAFT)
       description: |
@@ -61,7 +61,7 @@ paths:
     parameters:
       - $ref: '#/components/parameters/ProductId'
     get:
-      tags: [products]
+      tags: [Products]
       operationId: getProduct
       summary: Получить продукт по ID
       description: |
@@ -82,7 +82,7 @@ paths:
     parameters:
       - $ref: '#/components/parameters/ProductId'
     post:
-      tags: [products]
+      tags: [Products]
       operationId: publishProduct
       summary: Опубликовать продукт
       description: |
@@ -107,7 +107,7 @@ paths:
     parameters:
       - $ref: '#/components/parameters/ProductId'
     post:
-      tags: [products]
+      tags: [Products]
       operationId: hideProduct
       summary: Скрыть продукт
       description: |
@@ -130,7 +130,7 @@ paths:
 
   /api/v1/products/my:
     get:
-      tags: [products]
+      tags: [Products]
       operationId: listMyProducts
       summary: Мои продукты (для текущего seller'а)
       description: |
