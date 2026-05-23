@@ -26,7 +26,11 @@ public class GetProductQueryHandler implements UseCaseHandler<GetProductQuery, P
         Product product = repo.findById(q.productId().value(), ProductRepository.SelectMode.NO_LOCK)
             .orElseThrow(() -> new ProductNotFoundException(q.productId().value()));
 
-        if (product.status() != Product.Status.PUBLISHED) {
+        boolean isOwner = q.requesterSellerIdOrNull() != null
+            && q.requesterSellerIdOrNull().value().equals(product.sellerId());
+        boolean canSeeAnyStatus = q.isAdmin() || isOwner;
+
+        if (!canSeeAnyStatus && product.status() != Product.Status.PUBLISHED) {
             throw new ProductNotFoundException(q.productId().value());
         }
         return mapper.toDto(product);

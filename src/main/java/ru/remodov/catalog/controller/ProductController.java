@@ -50,7 +50,11 @@ public class ProductController implements ProductsApi {
     @Override
     @PreAuthorize("permitAll()")
     public ResponseEntity<ProductDto> getProduct(UUID productId) {
-        return ResponseEntity.ok(dispatcher.dispatch(new GetProductQuery(ProductId.of(productId))));
+        var requester = authenticatedSeller.tryCurrentSellerId().orElse(null);
+        boolean isAdmin = authenticatedSeller.isAdmin();
+        return ResponseEntity.ok(
+            dispatcher.dispatch(new GetProductQuery(ProductId.of(productId), requester, isAdmin))
+        );
     }
 
     @Override
