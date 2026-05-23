@@ -53,3 +53,4 @@ local-data/
 .claude/docs/
 .claude/agents/
 # END ucp-skills
+.factorypath
