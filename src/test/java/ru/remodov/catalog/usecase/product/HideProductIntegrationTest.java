@@ -88,4 +88,22 @@ class HideProductIntegrationTest extends CatalogBaseIntegrationTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         assertThat(response.getBody().getProperties()).containsEntry("code", "INVALID_STATE_TRANSITION");
     }
+
+    @Test
+    @DisplayName("AC-C5 / BR-P05: hide HIDDEN → 409 INVALID_STATE_TRANSITION")
+    void hide_whenAlreadyHidden_returns409() {
+        var productId = UUID.randomUUID();
+        var product = new ProductTestObjectGenerator()
+            .withId(productId).withSellerId(sellerId).withStatus(ProductStatus.HIDDEN).generate();
+        databasePreparer.createProduct(product).prepare();
+
+        var response = restTemplate.exchange(
+            URL + "/" + productId + "/hide", HttpMethod.POST,
+            new HttpEntity<>(TestHttpHeaders.withSellerToken(sellerId)),
+            ProblemDetail.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getBody().getProperties()).containsEntry("code", "INVALID_STATE_TRANSITION");
+    }
 }
