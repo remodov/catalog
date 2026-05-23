@@ -150,8 +150,8 @@ paths:
           required: false
           schema:
             type: integer
-            minimum: 0
-            default: 0
+            minimum: 1
+            default: 1
         - name: size
           in: query
           required: false
@@ -265,7 +265,7 @@ components:
             $ref: '#/components/schemas/ProductDto'
         page:
           type: integer
-          example: 0
+          example: 1
         size:
           type: integer
           example: 20

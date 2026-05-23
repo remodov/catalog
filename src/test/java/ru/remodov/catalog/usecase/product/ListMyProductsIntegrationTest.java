@@ -38,7 +38,7 @@ class ListMyProductsIntegrationTest extends CatalogBaseIntegrationTest {
             .prepare();
 
         var response = restTemplate.exchange(
-            URL + "?page=0&size=20", HttpMethod.GET,
+            URL + "?page=1&size=20", HttpMethod.GET,
             new HttpEntity<>(TestHttpHeaders.withSellerToken(sellerId)),
             ProductPageDto.class
         );
@@ -58,7 +58,7 @@ class ListMyProductsIntegrationTest extends CatalogBaseIntegrationTest {
             .prepare();
 
         var response = restTemplate.exchange(
-            URL + "?status=DRAFT&page=0&size=20", HttpMethod.GET,
+            URL + "?status=DRAFT&page=1&size=20", HttpMethod.GET,
             new HttpEntity<>(TestHttpHeaders.withSellerToken(sellerId)),
             ProductPageDto.class
         );

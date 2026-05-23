@@ -25,7 +25,7 @@ public class ListMyProductsQueryHandler implements UseCaseHandler<ListMyProducts
     public ProductPageDto handle(ListMyProductsQuery q) {
         var sellerId = q.requesterSellerId().value();
         long total = repo.countBySeller(sellerId, q.statusFilter());
-        List<ProductDto> content = repo.findBySeller(sellerId, q.statusFilter(), q.page() * q.size(), q.size(), q.sort())
+        List<ProductDto> content = repo.findBySeller(sellerId, q.statusFilter(), (q.page() - 1) * q.size(), q.size(), q.sort())
             .stream()
             .map(mapper::toDto)
             .toList();

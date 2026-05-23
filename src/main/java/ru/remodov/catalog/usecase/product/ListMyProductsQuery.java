@@ -17,8 +17,8 @@ public record ListMyProductsQuery(
 
     public ListMyProductsQuery {
         Objects.requireNonNull(requesterSellerId, "requesterSellerId");
-        if (page < 0) {
-            throw new IllegalArgumentException("page must be >= 0");
+        if (page < 1) {
+            throw new IllegalArgumentException("page must be >= 1");
         }
         if (size <= 0 || size > 100) {
             throw new IllegalArgumentException("size must be in (0, 100]");
