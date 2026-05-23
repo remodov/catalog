@@ -109,7 +109,7 @@ jooq {
                         isPojos = true
                         isRecords = true
                         isJavaTimeTypes = true
-                        isFluentSetters = false
+                        isFluentSetters = true
                     }
                 }
             }
