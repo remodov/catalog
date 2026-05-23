@@ -106,6 +106,31 @@ class CreateProductIntegrationTest extends CatalogBaseIntegrationTest {
     }
 
     @Test
+    @DisplayName("BR-P03: id из тела игнорируется, сервер генерирует свой UUID")
+    void create_whenClientSendsId_serverIgnoresIt() {
+        var clientSentId = UUID.randomUUID();
+        var serverGeneratedId = UUID.randomUUID();
+        given(uuidGenerator.generate()).willReturn(serverGeneratedId);
+        given(dateTimeService.now()).willReturn(Instant.parse("2026-04-28T10:00:00Z"));
+
+        var body = Map.of(
+            "id", clientSentId.toString(),
+            "title", "T", "description", "",
+            "price", new BigDecimal("100"), "currency", "RUB"
+        );
+
+        var response = restTemplate.exchange(
+            URL, HttpMethod.POST,
+            new HttpEntity<>(body, TestHttpHeaders.withSellerToken(sellerId)),
+            ProductDto.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody().getId()).isEqualTo(serverGeneratedId);
+        assertThat(response.getBody().getId()).isNotEqualTo(clientSentId);
+    }
+
+    @Test
     @DisplayName("AUTH-9: customer-роль на POST /products → 403")
     void create_whenCustomerRole_returns403() {
         var body = Map.of(
