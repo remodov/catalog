@@ -1,4 +1,5 @@
 import org.jooq.meta.jaxb.Logging
+import org.jooq.meta.jaxb.ForcedType
 
 plugins {
     java
@@ -93,6 +94,12 @@ jooq {
                         name = "org.jooq.meta.postgres.PostgresDatabase"
                         inputSchema = "public"
                         excludes = "databasechangelog|databasechangeloglock"
+                        forcedTypes.addAll(listOf(
+                            ForcedType().apply {
+                                userType = "java.time.OffsetDateTime"
+                                includeTypes = "TIMESTAMP\\ WITH\\ TIME\\ ZONE|TIMESTAMPTZ"
+                            }
+                        ))
                     }
                     target.apply {
                         packageName = "ru.remodov.catalog.generated"
