@@ -3,19 +3,18 @@ package ru.remodov.catalog.controller;
 import java.net.URI;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 import ru.remodov.catalog.api.AuthenticatedSeller;
 import ru.remodov.catalog.domain.ProductId;
+import ru.remodov.catalog.domain.ProductSortField;
 import ru.remodov.catalog.generated.api.ProductsApi;
 import ru.remodov.catalog.generated.api.model.CreateProductRequest;
 import ru.remodov.catalog.generated.api.model.ProductDto;
 import ru.remodov.catalog.generated.api.model.ProductPageDto;
 import ru.remodov.catalog.generated.api.model.ProductStatus;
 import ru.remodov.catalog.mapper.ProductJsonBeanMapper;
-import ru.remodov.catalog.repository.ProductRepository;
 import ru.remodov.catalog.usecase.product.CreateProductUseCase;
 import ru.remodov.catalog.usecase.product.GetProductQuery;
 import ru.remodov.catalog.usecase.product.HideProductUseCase;
@@ -26,6 +25,9 @@ import ru.vikulinva.usecase.UseCaseDispatcher;
 @RestController
 @RequiredArgsConstructor
 public class ProductController implements ProductsApi {
+
+    private static final int DEFAULT_PAGE = 1;
+    private static final int DEFAULT_SIZE = 20;
 
     private final UseCaseDispatcher dispatcher;
     private final AuthenticatedSeller authenticatedSeller;
@@ -80,10 +82,14 @@ public class ProductController implements ProductsApi {
         String sort
     ) {
         var sellerId = authenticatedSeller.currentSellerId();
-        var dbStatus = status == null ? null : mapper.toDbStatus(status);
+        var domainStatus = status == null ? null : mapper.toDomainStatus(status);
         return ResponseEntity.ok(
             dispatcher.dispatch(new ListMyProductsQuery(
-                sellerId, dbStatus, page, size, ProductRepository.SortField.parse(sort)
+                sellerId,
+                domainStatus,
+                page == null ? DEFAULT_PAGE : page,
+                size == null ? DEFAULT_SIZE : size,
+                ProductSortField.parse(sort)
             ))
         );
     }
