@@ -45,3 +45,11 @@ local-data/
 /docs/test-strategy.md
 /docs/usecase-pattern-style-guide.md
 /docs/usecase-spec-template.md
+
+# BEGIN ucp-skills (managed by claude-code-java/install.sh)
+# Папки .claude/docs/ и .claude/agents/ принадлежат install.sh целиком —
+# свои файлы туда не клади (.claude/skills/ остаётся открытым для custom-скиллов).
+.claude/skills/ucp-*
+.claude/docs/
+.claude/agents/
+# END ucp-skills
