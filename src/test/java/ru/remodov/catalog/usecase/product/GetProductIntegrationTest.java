@@ -117,4 +117,82 @@ class GetProductIntegrationTest extends CatalogBaseIntegrationTest {
         assertThat(response.getBody().getProperties()).containsEntry("code", "PRODUCT_NOT_FOUND");
     }
 
+    @Test
+    @DisplayName("Phase 4: владелец читает свой DRAFT → 200")
+    void get_whenOwnerReadsOwnDraft_returns200() {
+        var sellerId = UUID.randomUUID();
+        var productId = UUID.randomUUID();
+        var product = new ProductTestObjectGenerator()
+            .withId(productId).withSellerId(sellerId).withStatus(ProductStatus.DRAFT).generate();
+        databasePreparer.createProduct(product).prepare();
+
+        var response = restTemplate.exchange(
+            URL + "/" + productId, HttpMethod.GET,
+            new HttpEntity<>(TestHttpHeaders.withSellerToken(sellerId)),
+            ProductDto.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().getId()).isEqualTo(productId);
+        assertThat(response.getBody().getStatus().name()).isEqualTo("DRAFT");
+    }
+
+    @Test
+    @DisplayName("Phase 4: владелец читает свой HIDDEN → 200")
+    void get_whenOwnerReadsOwnHidden_returns200() {
+        var sellerId = UUID.randomUUID();
+        var productId = UUID.randomUUID();
+        var product = new ProductTestObjectGenerator()
+            .withId(productId).withSellerId(sellerId).withStatus(ProductStatus.HIDDEN).generate();
+        databasePreparer.createProduct(product).prepare();
+
+        var response = restTemplate.exchange(
+            URL + "/" + productId, HttpMethod.GET,
+            new HttpEntity<>(TestHttpHeaders.withSellerToken(sellerId)),
+            ProductDto.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().getId()).isEqualTo(productId);
+        assertThat(response.getBody().getStatus().name()).isEqualTo("HIDDEN");
+    }
+
+    @Test
+    @DisplayName("Phase 4: admin читает чужой DRAFT → 200")
+    void get_whenAdminReadsOtherDraft_returns200() {
+        var adminId = UUID.randomUUID();
+        var ownerSellerId = UUID.randomUUID();
+        var productId = UUID.randomUUID();
+        var product = new ProductTestObjectGenerator()
+            .withId(productId).withSellerId(ownerSellerId).withStatus(ProductStatus.DRAFT).generate();
+        databasePreparer.createProduct(product).prepare();
+
+        var response = restTemplate.exchange(
+            URL + "/" + productId, HttpMethod.GET,
+            new HttpEntity<>(TestHttpHeaders.withAdminToken(adminId)),
+            ProductDto.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().getId()).isEqualTo(productId);
+        assertThat(response.getBody().getStatus().name()).isEqualTo("DRAFT");
+    }
+
+    @Test
+    @DisplayName("Phase 4: анонимный читает DRAFT → 404")
+    void get_whenAnonymousReadsDraft_returns404() {
+        var productId = UUID.randomUUID();
+        var product = new ProductTestObjectGenerator()
+            .withId(productId).withStatus(ProductStatus.DRAFT).generate();
+        databasePreparer.createProduct(product).prepare();
+
+        var response = restTemplate.exchange(
+            URL + "/" + productId, HttpMethod.GET,
+            new HttpEntity<>(TestHttpHeaders.anonymous()),
+            ProblemDetail.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody().getProperties()).containsEntry("code", "PRODUCT_NOT_FOUND");
+    }
 }
