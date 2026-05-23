@@ -296,6 +296,7 @@ components:
     ProblemDetails:
       type: object
       description: Problem Details (RFC 9457)
+      required: [type, status, title, detail, code]
       properties:
         type:
           type: string
