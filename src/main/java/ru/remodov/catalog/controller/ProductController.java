@@ -47,27 +47,27 @@ public class ProductController implements ProductsApi {
 
     @Override
     @PreAuthorize("permitAll()")
-    public ResponseEntity<ProductDto> getProduct(UUID id) {
-        return ResponseEntity.ok(dispatcher.dispatch(new GetProductQuery(ProductId.of(id))));
+    public ResponseEntity<ProductDto> getProduct(UUID productId) {
+        return ResponseEntity.ok(dispatcher.dispatch(new GetProductQuery(ProductId.of(productId))));
     }
 
     @Override
     @PreAuthorize("hasRole('seller') or hasRole('admin')")
-    public ResponseEntity<ProductDto> publishProduct(UUID id) {
+    public ResponseEntity<ProductDto> publishProduct(UUID productId) {
         var sellerId = authenticatedSeller.currentSellerId();
         boolean isAdmin = authenticatedSeller.isAdmin();
         return ResponseEntity.ok(
-            dispatcher.dispatch(new PublishProductUseCase(ProductId.of(id), sellerId, isAdmin))
+            dispatcher.dispatch(new PublishProductUseCase(ProductId.of(productId), sellerId, isAdmin))
         );
     }
 
     @Override
     @PreAuthorize("hasRole('seller') or hasRole('admin')")
-    public ResponseEntity<ProductDto> hideProduct(UUID id) {
+    public ResponseEntity<ProductDto> hideProduct(UUID productId) {
         var sellerId = authenticatedSeller.currentSellerId();
         boolean isAdmin = authenticatedSeller.isAdmin();
         return ResponseEntity.ok(
-            dispatcher.dispatch(new HideProductUseCase(ProductId.of(id), sellerId, isAdmin))
+            dispatcher.dispatch(new HideProductUseCase(ProductId.of(productId), sellerId, isAdmin))
         );
     }
 

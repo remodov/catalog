@@ -57,7 +57,7 @@ paths:
         '403': { $ref: '#/components/responses/Forbidden' }
         '500': { $ref: '#/components/responses/InternalServerError' }
 
-  /api/v1/products/{id}:
+  /api/v1/products/{productId}:
     parameters:
       - $ref: '#/components/parameters/ProductId'
     get:
@@ -78,7 +78,7 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
         '500': { $ref: '#/components/responses/InternalServerError' }
 
-  /api/v1/products/{id}/publish:
+  /api/v1/products/{productId}/publish:
     parameters:
       - $ref: '#/components/parameters/ProductId'
     post:
@@ -103,7 +103,7 @@ paths:
         '409': { $ref: '#/components/responses/Conflict' }
         '500': { $ref: '#/components/responses/InternalServerError' }
 
-  /api/v1/products/{id}/hide:
+  /api/v1/products/{productId}/hide:
     parameters:
       - $ref: '#/components/parameters/ProductId'
     post:
@@ -189,7 +189,7 @@ components:
 
   parameters:
     ProductId:
-      name: id
+      name: productId
       in: path
       required: true
       schema:
